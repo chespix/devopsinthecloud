@@ -200,6 +200,8 @@
 
           "/usr/sbin/update-alternatives --set ruby /usr/bin/ruby2.2\n",
           "/usr/sbin/update-alternatives --set gem /usr/bin/gem2.2\n",
+          "/usr/bin/gem install rake -v 10.4.2\n",
+
 
 		  "# Build environment using Puppet\n",
           "puppet apply --modulepath=/home/ec2-user/modules /home/ec2-user/nodes.pp\n",
