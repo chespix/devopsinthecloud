@@ -12,7 +12,7 @@ Feature: Scripted provisioning of target environment
 
     Scenario: Is the proper version of Ruby installed?
         When I run "/usr/bin/ruby -v"
-        Then I should see "ruby 2.0.0"
+        Then I should see "ruby 2.2.4"
 
     Scenario: Is the proper version of Apache installed?
         When I run "/usr/sbin/httpd -v"
