@@ -157,9 +157,9 @@
 	          },
 			  "/etc/httpd/conf/passenger" : {
 	            "content" : { "Fn::Join" : ["", [
-	              "LoadModule passenger_module /usr/local/share/ruby/gems/2.0/gems/passenger-5.0.7/buildout/apache2/mod_passenger.so\n",
-	              "PassengerRoot /usr/local/share/ruby/gems/2.0/gems/passenger-5.0.7\n",
-	              "PassengerRuby /usr/bin/ruby2.0\n"
+	              "LoadModule passenger_module /usr/local/share/ruby/gems/2.2/gems/passenger-5.0.30/buildout/apache2/mod_passenger.so\n",
+	              "PassengerRoot /usr/local/share/ruby/gems/2.2/gems/passenger-5.0.30\n",
+	              "PassengerRuby /usr/bin/ruby2.2\n"
 	            ]]},
 	                "mode"   : "000500",
 	                "owner"  : "root",
@@ -200,8 +200,6 @@
 
           "/usr/sbin/update-alternatives --set ruby /usr/bin/ruby2.2\n",
           "/usr/sbin/update-alternatives --set gem /usr/bin/gem2.2\n",
-          "/usr/bin/gem install rake -v 10.4.2\n",
-
 
 		  "# Build environment using Puppet\n",
           "puppet apply --modulepath=/home/ec2-user/modules /home/ec2-user/nodes.pp\n",
@@ -216,6 +214,9 @@
 		  "# Disable tty for ec2-user\n",
 		  "echo \"Defaults:%ec2-user !requiretty\" >> /etc/sudoers\n",
 		  "echo \"Defaults:ec2-user !requiretty\" >> /etc/sudoers\n",
+		  
+		  "# Install passenger module for apache2\n",
+		  "/usr/local/bin/passenger-install-apache2-module -a\n",
 
 		  "/opt/aws/bin/cfn-signal", " -e 0", " '", { "Ref" : "WaitHandle" }, "'","\n",
 
