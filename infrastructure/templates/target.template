@@ -107,7 +107,8 @@
               "yum" : {
                 "puppet3"   : [],
                 "ruby22"   : [],
-                "ruby22-devel"   : []
+                "ruby22-devel"   : [],
+                "mysql-devel"   : []
               }
             },
 
