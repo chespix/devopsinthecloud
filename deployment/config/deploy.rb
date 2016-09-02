@@ -52,7 +52,7 @@ namespace :deploy do
   end
   
   task :db_migrate do
-    run "cd #{deploy_to} && rake db:migrate"
+    run "cd #{deploy_to} && bundle exec rake db:migrate"
   end
   
   task :start, :roles => :app do
