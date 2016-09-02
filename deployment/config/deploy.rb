@@ -44,6 +44,7 @@ namespace :deploy do
     run "cd #{deploy_to} && sudo wget #{artifact_url}"
     run "cd #{deploy_to} && sudo tar -zxf #{artifact}"
     run "cd #{deploy_to} && sudo rm #{artifact}"
+    run "sudo chown -R #{user}:#{user} #{deploy_to}"
   end
   
   task :bundle_install do
@@ -51,7 +52,7 @@ namespace :deploy do
   end
   
   task :db_migrate do
-    run "cd #{deploy_to} && sudo /usr/local/bin/rake db:migrate"
+    run "cd #{deploy_to} && rake db:migrate"
   end
   
   task :start, :roles => :app do
