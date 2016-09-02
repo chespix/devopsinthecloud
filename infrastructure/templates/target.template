@@ -105,7 +105,8 @@
           "config" : {
             "packages" : {
               "yum" : {
-                "puppet3"   : []
+                "puppet3"   : [],
+                "ruby22"   : [],
               }
             },
 
@@ -188,6 +189,8 @@
 		  "#!/bin/bash -v\n",
 		  "date > /home/ec2-user/starttime\n",
           "yum update -y aws-cfn-bootstrap\n",
+          "update-alternatives --set ruby /usr/bin/ruby2.2",
+          "update-alternatives --set gem /usr/bin/gem2.2",
 
           "# Install packages\n",
           "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackName" }, " -r WebServer ",
