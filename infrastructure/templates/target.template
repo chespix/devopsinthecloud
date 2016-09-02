@@ -8,7 +8,7 @@
     "KeyName" : {
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
       "Type" : "String",
-      "Default" : "ditc",
+      "Default" : "MaxVB KeyPair",
       "MinLength": "1",
       "MaxLength": "64",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
@@ -31,14 +31,14 @@
 	"PrivateBucket" : {
       "Description" : "S3 bucket for storing credentials",
       "Type" : "String",
-      "Default" : "stelligentlabs-private",
+      "Default" : "maxvb-ci-creds",
       "ConstraintDescription" : "Must be a valid S3 Bucket"
     },
 
 	"PublicBucket" : {
 	  "Description" : "S3 bucket for storing build artifacts",
       "Type" : "String",
-      "Default" : "stelligentlabs",
+      "Default" : "maxvb-ci-artifacts",
       "ConstraintDescription" : "Must be a valid S3 Bucket"
 	}
   },
@@ -70,21 +70,6 @@
 
   "Resources" : {
 
-    "CfnUser" : {
-      "Type" : "AWS::IAM::User",
-      "Properties" : {
-        "Path": "/",
-        "Policies": [{
-          "PolicyName": "root",
-          "PolicyDocument": { "Statement":[{
-            "Effect":"Allow",
-            "Action":"*",
-            "Resource":"*"
-          }
-        ]}
-       }]
-      }
-    },
 
 	"PrivateBucketPolicy" : {
       "Type" : "AWS::S3::BucketPolicy",
@@ -97,7 +82,7 @@
 	          "Action":["s3:GetObject"],
 	          "Effect":"Allow",
 	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "PrivateBucket" } , "/*" ]]},
-	          "Principal":{ "AWS": { "Fn::GetAtt" : [ "CfnUser", "Arn" ]} }
+	          "Principal":{ "AWS": "arn:aws:iam::617667935189:user/brust" }
             }
 		  ]
         },
@@ -108,7 +93,7 @@
     "HostKeys" : {
       "Type" : "AWS::IAM::AccessKey",
       "Properties" : {
-        "UserName" : { "Ref": "CfnUser" }
+        "UserName" : "brust"
       }
     },
 
