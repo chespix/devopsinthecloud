@@ -51,7 +51,7 @@ namespace :deploy do
   end
   
   task :db_migrate do
-    run "cd #{deploy_to} && sudo rake db:migrate"
+    run "cd #{deploy_to} && sudo /usr/local/bin/rake db:migrate"
   end
   
   task :start, :roles => :app do
