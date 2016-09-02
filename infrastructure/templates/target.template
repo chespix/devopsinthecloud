@@ -106,7 +106,7 @@
             "packages" : {
               "yum" : {
                 "puppet3"   : [],
-                "ruby22"   : [],
+                "ruby22"   : []
               }
             },
 
