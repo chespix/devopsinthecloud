@@ -1,0 +1,88 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "CloudFormation Template to create basic account resource policies",
+
+  "Parameters" : {
+
+  "Environment" : {
+	  "Description" : "Environment Name",
+      "Type" : "String",
+      "AllowedPattern" : "[a-z0-9]*",
+      "ConstraintDescription" : "valid environment name"
+	},
+
+  "Project" : {
+	  "Description" : "Project Name",
+      "Type" : "String",
+      "AllowedPattern" : "[a-z0-9]*",
+      "ConstraintDescription" : "Valid project name"
+	}
+
+  },
+
+  "Resources" : {
+	"PublicBucketPolicy" : {
+	  "Type" : "AWS::S3::BucketPolicy",
+	  "Properties" : {
+	    "PolicyDocument": {
+	      "Id":"PublicBucketPolicy",
+	      "Statement":[
+		    {
+	          "Sid":"ReadAccess",
+	          "Action":["s3:GetObject"],
+	          "Effect":"Allow",
+	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "PublicBucket" } , "/*"]]},
+	          "Principal":{ "AWS": "*" }
+	        }
+		  ]
+	    },
+	    "Bucket" : {"Ref" : "PublicBucket"}
+	  }
+	},
+
+  "PublicBucket" : {
+  "Type" : "AWS::S3::Bucket",
+  "Properties" : {
+    "BucketName" : { "Fn::Join" : ["",
+       [ { "Ref" : "Environment" } ,
+       "-",
+       { "Ref" : "Project" } ,
+       "-artifacts" ]]},
+    "Tags" : [ {
+        "Key" : "Environment",
+        "Value" : { "Ref" : "Environment" }
+        }, {
+        "Key" : "Project",
+        "Value" : { "Ref" : "Project" }
+      } ]
+  }
+  },
+  "PrivateBucket" : {
+  "Type" : "AWS::S3::Bucket",
+  "Properties" : {
+    "BucketName" : { "Fn::Join" : ["",
+       [ { "Ref" : "Environment" } ,
+       "-",
+       { "Ref" : "Project" } ,
+        "-secrets" ]]},
+    "Tags" : [ {
+         "Key" : "Environment",
+         "Value" : { "Ref" : "Environment" }
+      }, {
+         "Key" : "Project",
+         "Value" : { "Ref" : "Project" }
+      } ]
+  }
+  }
+},
+
+  "Outputs" : {
+    "ArtifactBucketName" : {
+      "Value" : {"Fn::GetAtt": ["PublicBucket", "BucketName"]}
+    },
+    "SecretsBucketName" : {
+      "Value" : {"Fn::GetAtt": ["privateBucket", "BucketName"]}
+    }
+  }
+}

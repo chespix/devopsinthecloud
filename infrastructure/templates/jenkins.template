@@ -5,17 +5,42 @@
 
   "Parameters" : {
 
+    "Environment" : {
+  	  "Description" : "Environment Name",
+        "Type" : "String",
+        "ConstraintDescription" : "valid environment name"
+  	},
+
+    "Project" : {
+  	  "Description" : "Project Name",
+        "Type" : "String",
+        "ConstraintDescription" : "Valid project name"
+  	},
+
+    "VPCCIDR" : {
+  	  "Description" : "CIDR Range in format x.x.x.x/x",
+        "Type" : "String",
+        "ConstraintDescription" : "Valid CIDR network range for whole VPC"
+  	},
+
+    "SubnetCIDR" : {
+  	  "Description" : "CIDR Range in format x.x.x.x/x",
+        "Type" : "String",
+        "ConstraintDescription" : "Valid CIDR subnetwork range inside VPC defined CIDR"
+  	},
+
     "KeyName" : {
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
       "Type": "AWS::EC2::KeyPair::KeyName",
       "MinLength": "1",
       "MaxLength": "64",
       "AllowedPattern" : "[-_ a-zA-Z0-9]*",
+      "Default" : "environment-project-KeyPair",
       "ConstraintDescription" : "Can contain only alphanumeric characters, spaces, dashes and underscores."
     },
 
     "InstanceType" : {
-      "Description" : "WebServer EC2 instance type",
+      "Description" : "Jenkins EC2 instance type",
       "Type" : "String",
       "Default" : "m3.xlarge",
       "ConstraintDescription" : "Must be a valid EC2 instance type."
@@ -24,14 +49,14 @@
 	"PrivateBucket" : {
       "Description" : "S3 bucket for storing credentials",
       "Type" : "String",
-      "Default" : "stelligentlabs-private",
+      "Default" : "environment-project-secrets",
       "ConstraintDescription" : "Must be a valid S3 Bucket"
     },
 
 	"PublicBucket" : {
 	  "Description" : "S3 bucket for storing build artifacts",
       "Type" : "String",
-      "Default" : "stelligentlabs",
+      "Default" : "environment-project-artifacts",
       "ConstraintDescription" : "Must be a valid S3 Bucket"
 	}
   },
@@ -70,10 +95,19 @@
     "CfnUser" : {
       "Type" : "AWS::IAM::User",
       "Properties" : {
+        "UserName": { "Fn::Join" : ["",
+           [ { "Ref" : "Environment" } ,
+           "-",
+           { "Ref" : "Project" } ,
+           "-admin" ]]},
         "Path": "/",
         "Policies": [
 		  {
-            "PolicyName": "Admin",
+            "PolicyName": { "Fn::Join" : ["",
+               [ { "Ref" : "Environment" } ,
+               "-",
+               { "Ref" : "Project" } ,
+               "-admin-policy" ]]},
             "PolicyDocument":
 			  { "Statement": [
 				{
@@ -81,8 +115,11 @@
                   "Action":"*",
                   "Resource":"*"
 				}
-			]}
-          }
+			]},
+        "Metadata" : {
+          "Comment1" : "We need to tailor a specific policy for this user Needs review."
+        }
+      }
 		]
       }
     },
@@ -90,13 +127,23 @@
     "DeploymentQueue" : {
 	  "Type" : "AWS::SQS::Queue",
 	  "Properties" : {
-		"VisibilityTimeout" : "0"
+      "QueueName" : { "Fn::Join" : ["",
+         [ { "Ref" : "Environment" } ,
+         "-",
+         { "Ref" : "Project" } ,
+         "-deployment" ]]},
+		  "VisibilityTimeout" : "0"
 	  }
 	},
 
 	"CFNStackQueue" : {
 	  "Type" : "AWS::SQS::Queue",
 	  "Properties" : {
+      "QueueName" : { "Fn::Join" : ["",
+         [ { "Ref" : "Environment" } ,
+         "-",
+         { "Ref" : "Project" } ,
+         "-cfstack" ]]},
 		"VisibilityTimeout" : "0"
 	  }
 	},
@@ -127,7 +174,7 @@
       }
     },
 
-    "WebServer": {
+    "JenkinsServer": {
       "Type": "AWS::EC2::Instance",
  	  "DependsOn" : [ "PrivateBucketPolicy", "GatewayToInternet" ],
       "Metadata" : {
@@ -161,35 +208,56 @@
 		      },
 
 		      "/usr/share/tomcat6/scripts/aws/sqs_receive_message.rb" : {
-			  	"source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/stelligentlabs/scripts/aws/sqs_receive_message.rb"]]},
+			  	"source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+            { "Ref" : "Project" },
+            "/",
+            { "Ref" : "Environment" },
+            "/scripts/aws/sqs_receive_message.rb"]]},
 		        "mode"   : "000500",
 		        "owner"  : "tomcat",
 		        "group"  : "tomcat"
 		      },
 
 			  "/usr/share/tomcat6/scripts/aws/sqs_send_message.rb" : {
-				"source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/stelligentlabs/scripts/aws/sqs_send_message.rb"]]},
+				"source" : { "Fn::Join" : ["",
+          ["https://raw.githubusercontent.com/chespix/",
+           { "Ref" : "Project" },
+           "/",
+           { "Ref" : "Environment" },
+           "/scripts/aws/sqs_send_message.rb"]]},
 		        "mode"   : "000500",
 		        "owner"  : "tomcat",
 		        "group"  : "tomcat"
 		      },
 
 			  "/usr/share/tomcat6/scripts/aws/terminate.rb" : {
-		        "source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/stelligentlabs/scripts/aws/terminate.rb"]]},
+		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+           { "Ref" : "Project" },
+           "/",
+           { "Ref" : "Environment" },
+           "/scripts/aws/terminate.rb"]]},
 		        "mode"   : "000500",
 		        "owner"  : "tomcat",
 		        "group"  : "tomcat"
 		      },
 
 		  	  "/usr/share/tomcat6/scripts/aws/create_config_domain.rb" : {
-		        "source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/stelligentlabs/scripts/aws/create_config_domain.rb"]]},
+		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+           { "Ref" : "Project" },
+           "/",
+           { "Ref" : "Environment" },
+           "/scripts/aws/create_config_domain.rb"]]},
 		        "mode"   : "000500",
 		        "owner"  : "tomcat",
 		        "group"  : "tomcat"
 		      },
 
 			  "/usr/share/tomcat6/scripts/aws/showback_domain.rb" : {
-		        "source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/stelligentlabs/scripts/aws/showback_domain.rb"]]},
+		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+           { "Ref" : "Project" },
+           "/",
+           { "Ref" : "Environment" },
+           "/scripts/aws/showback_domain.rb"]]},
 		        "mode"   : "000500",
 		        "owner"  : "tomcat",
 		        "group"  : "tomcat"
@@ -212,7 +280,11 @@
 	          },
 
 			  "/etc/cron.hourly/jenkins_versioning.sh" : {
-				"source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/stelligentlabs/scripts/jenkins/jenkins_versioning.sh"]]},
+				"source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+           { "Ref" : "Project" },
+           "/",
+           { "Ref" : "Environment" },
+           "/scripts/jenkins/jenkins_versioning.sh"]]},
 		        "mode"   : "000500",
 		        "owner"  : "tomcat",
 		        "group"  : "tomcat"
@@ -250,14 +322,23 @@
                                     "DeviceIndex" : "0"
                                 } ],
         "KeyName"        : { "Ref" : "KeyName" },
-		"Tags"           : [{ "Key" : "Name", "Value" : "Jenkins" }],
+		"Tags"           : [ {
+         "Key" : "Environment",
+         "Value" : { "Ref" : "Environment" }
+      }, {
+         "Key" : "Project",
+         "Value" : { "Ref" : "Project" }
+      }, {
+         "Key" : "Name",
+        "Value" : "Jenkins"
+      } ],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
 		  "date > /home/ec2-user/starttime\n",
           "yum update -y aws-cfn-bootstrap\n",
 
           "# Install packages\n",
-          "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackName" }, " -r WebServer ",
+          "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackName" }, " -r JenkinsServer ",
           "    --access-key ",  { "Ref" : "HostKeys" },
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
@@ -267,7 +348,7 @@
 
 		  "# Update Jenkins with versioned configuration\n",
 		  "rm -rf /usr/share/tomcat6/.jenkins\n",
-		  "git clone git@github.com:stelligent/devopsinthecloudjenkins.git /usr/share/tomcat6/.jenkins\n",
+		  "git clone git@github.com:chespix/devopsinthecloudjenkins.git /usr/share/tomcat6/.jenkins\n",
 
 		  "# Installing Ruby 1.9.3 from RPM\n",
 		  "wget https://s3.amazonaws.com/stelligentlabs/resources/rpm/ruby-1.9.3p0-2.amzn1.x86_64.rpm\n",
@@ -328,6 +409,22 @@
       }
     },
 
+    "JenkinsFQDN" : {
+      "Type" : "AWS::Route53::RecordSet",
+      "Properties" : {
+        "HostedZoneName" : "chespi.org.",
+        "Comment" : "DNS name for my instance.",
+        "Name" : { "Fn::Join" : ["",
+           [ { "Ref" : "Environment" } ,
+           "-",
+           { "Ref" : "Project" } ,
+           "-jenkins.chespi.org." ]]},
+        "Type" : "A",
+        "TTL" : "900",
+        "ResourceRecords" : [ { "Ref" : "IPAddress" } ]
+      }
+    },
+
     "IPAddress" : {
       "Type" : "AWS::EC2::EIP",
        "Properties" : {
@@ -372,7 +469,7 @@
 
     "WaitCondition" : {
       "Type" : "AWS::CloudFormation::WaitCondition",
-      "DependsOn" : "WebServer",
+      "DependsOn" : "JenkinsServer",
       "Properties" : {
         "Handle" : { "Ref" : "WaitHandle" },
         "Timeout" : "9600"
@@ -384,7 +481,7 @@
         "Properties" : {
             "EnableDnsSupport"      : "True",
             "EnableDnsHostnames"    : "True",
-            "CidrBlock"             : "10.50.50.0/16",
+            "CidrBlock"             :  { "Ref" : "VPCCIDR" },
             "Tags" : [
                 { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
                 { "Key" : "Network", "Value" : "Public" }
@@ -396,10 +493,10 @@
         "Type" : "AWS::EC2::Subnet",
         "Properties" : {
             "VpcId"     : { "Ref" : "VPC" },
-            "CidrBlock" : "10.50.50.0/24",
+            "CidrBlock" : { "Ref" : "SubnetCIDR" },
             "Tags" : [
                 { "Key" : "Application" , "Value" : { "Ref" : "AWS::StackName" } },
-                { "Key" : "Netowrk", "Value" : "Public" }
+                { "Key" : "Network", "Value" : "Public" }
             ]
         }
     },
@@ -435,7 +532,7 @@
 
     "PublicSubnetRouteTableAssociation" : {
         "Type" : "AWS::EC2::SubnetRouteTableAssociation",
-        "Properties" : { 
+        "Properties" : {
             "SubnetId" : { "Ref" : "PublicSubnet" },
             "RouteTableId" : { "Ref" : "PublicRouteTable" }
         }
@@ -450,15 +547,15 @@
 		"Value" : {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]}
 	},
 	"JenkinsURL" : {
-      "Value" : { "Fn::Join" : ["", ["http://", { "Ref" : "IPAddress" }, ":8080/jenkins"]] },
+      "Value" : { "Fn::Join" : ["", ["http://", { "Ref" : "JenkinsFQDN" }, ":8080/jenkins"]] },
       "Description" : "URL for newly created Jenkins app"
     },
 	"DeploymentQueueName" : {
-	  "Description" : "Name newly created Deployment SQS Queue",
+	  "Description" : "Name of newly created Deployment SQS Queue",
 	  "Value" : { "Fn::GetAtt" : ["DeploymentQueue", "QueueName"]}
 	},
 	"CFNStackQueueName" : {
-	  "Description" : "Name newly created CFN Stack SQS Queue",
+	  "Description" : "Name of newly created CFN Stack SQS Queue",
 	  "Value" : { "Fn::GetAtt" : ["CFNStackQueue", "QueueName"]}
 	}
   }
