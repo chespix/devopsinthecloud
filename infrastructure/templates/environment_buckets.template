@@ -79,10 +79,10 @@
 
   "Outputs" : {
     "ArtifactBucketName" : {
-      "Value" : {"Fn::GetAtt": ["PublicBucket", "BucketName"]}
+      "Value" : {"Ref" : "PublicBucket"}
     },
     "SecretsBucketName" : {
-      "Value" : {"Fn::GetAtt": ["privateBucket", "BucketName"]}
+      "Value" : {"Ref" : "PublicBucket"}
     }
   }
 }

@@ -115,10 +115,7 @@
                   "Action":"*",
                   "Resource":"*"
 				}
-			]},
-        "Metadata" : {
-          "Comment1" : "We need to tailor a specific policy for this user Needs review."
-        }
+			]}
       }
 		]
       }
