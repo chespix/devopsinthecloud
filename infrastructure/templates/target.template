@@ -5,6 +5,18 @@
 
   "Parameters" : {
 
+    "Environment" : {
+  	  "Description" : "Environment Name",
+        "Type" : "String",
+        "ConstraintDescription" : "valid environment name"
+  	},
+
+    "Project" : {
+  	  "Description" : "Project Name",
+        "Type" : "String",
+        "ConstraintDescription" : "Valid project name"
+  	},
+
     "KeyName" : {
       "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instances",
       "Type" : "String",
@@ -81,19 +93,19 @@
               "Sid":"ReadAccess",
 	          "Action":["s3:GetObject"],
 	          "Effect":"Allow",
-	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "PrivateBucket" } , "/*" ]]},
-	          "Principal":{ "AWS": "arn:aws:iam::617667935189:user/brust" }
+	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "Environment" }, "-", { "Ref" : "Project" },"-secrets", "/*" ]]},
+	          "Principal":{ "AWS": { "Fn::GetAtt" : [ "production-devopsinthecloud-admin", "Arn" ]} }
             }
 		  ]
         },
-        "Bucket" : {"Ref" : "PrivateBucket"}
+        "Bucket" : { "Fn::Join" : ["", [{ "Ref" : "Environment" }, "-", { "Ref" : "Project" },"-secrets" ]]}
       }
     },
 
     "HostKeys" : {
       "Type" : "AWS::IAM::AccessKey",
       "Properties" : {
-        "UserName" : "brust"
+        "UserName" : "production-devopsinthecloud-admin"
       }
     },
 
@@ -118,7 +130,7 @@
 
 			"files" : {
 			  "/home/ec2-user/id_rsa.pub" : {
-			   "source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/", { "Ref" : "PrivateBucket" }, "/id_rsa.pub"]]},
+			   "source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/",{ "Ref" : "Environment" }, "-", { "Ref" : "Project" },"-secrets", "/id_rsa.pub"]]},
                "mode"   : "000500",
                "owner"  : "root",
                "group"  : "root",
@@ -174,7 +186,8 @@
 		    "type" : "S3",
 		    "accessKeyId" : { "Ref" : "HostKeys" },
 		    "secretKey" : {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
-		    "buckets" : [ { "Ref" : "PrivateBucket" }, { "Ref" : "PublicBucket"} ]
+        "buckets" : [ { "Fn::Join" : ["", [{ "Ref" : "Environment" }, "-", { "Ref" : "Project" } , "-secrets"]]},
+         { "Fn::Join" : ["", [{ "Ref" : "Environment" }, "-", { "Ref" : "Project" } , "-artifacts"]]} ]
 		  }
 		}
       },
@@ -214,7 +227,7 @@
 		  "# Disable tty for ec2-user\n",
 		  "echo \"Defaults:%ec2-user !requiretty\" >> /etc/sudoers\n",
 		  "echo \"Defaults:ec2-user !requiretty\" >> /etc/sudoers\n",
-		  
+
 		  "# Install passenger module for apache2\n",
 		  "/usr/local/bin/passenger-install-apache2-module -a\n",
 
@@ -238,15 +251,15 @@
        }
     },
 
-    "mainXface" : {                                                             
-        "Type" : "AWS::EC2::NetworkInterface",                                  
-        "Properties" : {                                                        
-                "GroupSet"                 : [ { "Ref" : "FrontendGroup" } ],   
-                "SubnetId"                 : { "Ref" : "PublicSubnet" },        
-                "Description"              : "ditc-target-app-interface",          
-                "SourceDestCheck"          : "true"                             
-        }                                                                       
-    },        
+    "mainXface" : {
+        "Type" : "AWS::EC2::NetworkInterface",
+        "Properties" : {
+                "GroupSet"                 : [ { "Ref" : "FrontendGroup" } ],
+                "SubnetId"                 : { "Ref" : "PublicSubnet" },
+                "Description"              : "ditc-target-app-interface",
+                "SourceDestCheck"          : "true"
+        }
+    },
 
     "FrontendGroup" : {
       "Type" : "AWS::EC2::SecurityGroup",
