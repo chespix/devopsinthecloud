@@ -68,26 +68,6 @@
 
   "Resources" : {
 
-
-	"PrivateBucketPolicy" : {
-      "Type" : "AWS::S3::BucketPolicy",
-      "Properties" : {
-        "PolicyDocument": {
-          "Id":"PrivateBucketPolicy",
-          "Statement":[
- 		    {
-              "Sid":"ReadAccess",
-	          "Action":["s3:GetObject"],
-	          "Effect":"Allow",
-	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "Environment" }, "-", { "Ref" : "Project" },"-secrets", "/*" ]]},
-	          "Principal": "arn:aws:iam::617380474519:user/production-devopsinthecloud-admin"
-            }
-		  ]
-        },
-        "Bucket" : { "Fn::Join" : ["", [{ "Ref" : "Environment" }, "-", { "Ref" : "Project" },"-secrets" ]]}
-      }
-    },
-
     "HostKeys" : {
       "Type" : "AWS::IAM::AccessKey",
       "Properties" : {
