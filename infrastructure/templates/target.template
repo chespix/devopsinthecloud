@@ -77,7 +77,7 @@
 
     "WebServer": {
       "Type": "AWS::EC2::Instance",
- 	  "DependsOn" : [ "PrivateBucketPolicy", "GatewayToInternet" ],
+ 	  "DependsOn" : ["GatewayToInternet" ],
 	  "Metadata" : {
         "AWS::CloudFormation::Init" : {
           "config" : {
