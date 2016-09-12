@@ -45,20 +45,6 @@
       "Default" : "m3.xlarge",
       "ConstraintDescription" : "Must be a valid EC2 instance type."
     },
-
-	"PrivateBucket" : {
-      "Description" : "S3 bucket for storing credentials",
-      "Type" : "String",
-      "Default" : "environment-project-secrets",
-      "ConstraintDescription" : "Must be a valid S3 Bucket"
-    },
-
-	"PublicBucket" : {
-	  "Description" : "S3 bucket for storing build artifacts",
-      "Type" : "String",
-      "Default" : "environment-project-artifacts",
-      "ConstraintDescription" : "Must be a valid S3 Bucket"
-	}
   },
 
   "Mappings" : {
@@ -155,12 +141,20 @@
               "Sid":"ReadAccess",
 	          "Action":["s3:GetObject"],
 	          "Effect":"Allow",
-	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "PrivateBucket" } , "/*" ]]},
+	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::",
+              [ { "Ref" : "Environment" } ,
+              "-",
+              { "Ref" : "Project" } ,
+              "-secrets" ]
+              , "/*" ]]},
 	          "Principal":{ "AWS": { "Fn::GetAtt" : [ "CfnUser", "Arn" ]} }
             }
 		  ]
         },
-        "Bucket" : {"Ref" : "PrivateBucket"}
+        "Bucket" : [ { "Ref" : "Environment" } ,
+        "-",
+        { "Ref" : "Project" } ,
+        "-secrets" ]
       }
     },
 
@@ -261,7 +255,12 @@
 		      },
 
 			  "/usr/share/tomcat6/.ssh/known_hosts" : {
-				"source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/", { "Ref" : "PrivateBucket" }, "/known_hosts"]]},
+				"source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/",
+          [ { "Ref" : "Environment" } ,
+          "-",
+          { "Ref" : "Project" } ,
+          "-secrets" ]
+          , "/known_hosts"]]},
 	            "mode"   : "000644",
 	            "owner"  : "tomcat",
 	            "group"  : "tomcat",
@@ -269,7 +268,12 @@
 	          },
 
 			  "/usr/share/tomcat6/.ssh/id_rsa" : {
-				"source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/", { "Ref" : "PrivateBucket" }, "/id_rsa"]]},
+				"source" : { "Fn::Join" : ["", ["https://s3.amazonaws.com/",
+          [ { "Ref" : "Environment" } ,
+          "-",
+          { "Ref" : "Project" } ,
+          "-secrets" ]
+          , "/id_rsa"]]},
 	            "mode"   : "000600",
 	            "owner"  : "tomcat",
 	            "group"  : "tomcat",
@@ -306,7 +310,16 @@
 		    "type" : "S3",
 		    "accessKeyId" : { "Ref" : "HostKeys" },
 		    "secretKey" : {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
-		    "buckets" : [ { "Ref" : "PrivateBucket" }, { "Ref" : "PublicBucket" } ]
+		    "buckets" : [
+          [ { "Ref" : "Environment" } ,
+          "-",
+          { "Ref" : "Project" } ,
+          "-secrets" ]
+          ,[ { "Ref" : "Environment" } ,
+          "-",
+          { "Ref" : "Project" } ,
+          "-artifacts" ]
+         ]
 		  }
 		}
       },
@@ -377,10 +390,30 @@
 		  "sed -i 's@<secretKey>.*</secretKey>@<secretKey>", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]}, "</secretKey>@' /usr/share/tomcat6/.jenkins/hudson.plugins.s3.S3BucketPublisher.xml\n",
 
 		  "# Update Build Jenkins Job config\n",
-		  "sed -i 's@<bucket>.*</bucket>@<bucket>", { "Ref" : "PublicBucket" }, "</bucket>@' /usr/share/tomcat6/.jenkins/jobs/Build/config.xml\n",
-		  "sed -i 's@<bucket>.*</bucket>@<bucket>", { "Ref" : "PublicBucket" }, "</bucket>@' /usr/share/tomcat6/.jenkins/jobs/Puppet/config.xml\n",
-		  "sed -i 's@<bucket>.*</bucket>@<bucket>", { "Ref" : "PublicBucket" }, "/templates</bucket>@' /usr/share/tomcat6/.jenkins/jobs/Templates/config.xml\n",
-		  "sed -i 's@<bucket>.*</bucket>@<bucket>", { "Ref" : "PublicBucket" }, "/scripts/aws</bucket>@' /usr/share/tomcat6/.jenkins/jobs/JenkinsConfig/config.xml\n",
+		  "sed -i 's@<bucket>.*</bucket>@<bucket>",
+      [ { "Ref" : "Environment" } ,
+      "-",
+      { "Ref" : "Project" } ,
+      "-artifacts" ],
+      "</bucket>@' /usr/share/tomcat6/.jenkins/jobs/Build/config.xml\n",
+		  "sed -i 's@<bucket>.*</bucket>@<bucket>",
+      [ { "Ref" : "Environment" } ,
+      "-",
+      { "Ref" : "Project" } ,
+      "-artifacts" ],
+      "</bucket>@' /usr/share/tomcat6/.jenkins/jobs/Puppet/config.xml\n",
+		  "sed -i 's@<bucket>.*</bucket>@<bucket>",
+      [ { "Ref" : "Environment" } ,
+      "-",
+      { "Ref" : "Project" } ,
+      "-artifacts" ],
+      "/templates</bucket>@' /usr/share/tomcat6/.jenkins/jobs/Templates/config.xml\n",
+		  "sed -i 's@<bucket>.*</bucket>@<bucket>",
+      [ { "Ref" : "Environment" } ,
+      "-",
+      { "Ref" : "Project" } ,
+      "-artifacts" ],
+      "/scripts/aws</bucket>@' /usr/share/tomcat6/.jenkins/jobs/JenkinsConfig/config.xml\n",
 
 		  "# Add AWS Credentials to Tomcat\n",
 		  "echo \"AWS_ACCESS_KEY=", { "Ref" : "HostKeys" }, "\" >> /etc/sysconfig/tomcat6\n",
