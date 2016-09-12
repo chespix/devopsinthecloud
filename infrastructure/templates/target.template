@@ -30,7 +30,7 @@
     "InstanceType" : {
       "Description" : "EC2 instance type",
       "Type" : "String",
-      "Default" : "t2.medium",
+      "Default" : "t2.micro",
       "ConstraintDescription" : "must be a valid EC2 instance type."
     },
 
@@ -38,20 +38,6 @@
 	  "Description" : "Mode for rails to run in",
 	  "Type" : "String",
 	  "Default" : "development"
-	},
-
-	"PrivateBucket" : {
-      "Description" : "S3 bucket for storing credentials",
-      "Type" : "String",
-      "Default" : "maxvb-ci-creds",
-      "ConstraintDescription" : "Must be a valid S3 Bucket"
-    },
-
-	"PublicBucket" : {
-	  "Description" : "S3 bucket for storing build artifacts",
-      "Type" : "String",
-      "Default" : "maxvb-ci-artifacts",
-      "ConstraintDescription" : "Must be a valid S3 Bucket"
 	}
   },
 
@@ -94,7 +80,7 @@
 	          "Action":["s3:GetObject"],
 	          "Effect":"Allow",
 	          "Resource": { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "Environment" }, "-", { "Ref" : "Project" },"-secrets", "/*" ]]},
-	          "Principal":{ "AWS": { "Fn::GetAtt" : [ "production-devopsinthecloud-admin", "Arn" ]} }
+	          "Principal": "arn:aws:iam::617380474519:user/production-devopsinthecloud-admin"
             }
 		  ]
         },
@@ -355,9 +341,6 @@
     },
 	"StackName" : {
       "Value" : { "Ref" : "AWS::StackName" }
-    },
-    "ArtifactBucket" : {
-      "Value" : { "Ref" : "PublicBucket" }
     },
 	"SampleApp" : {
       "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ] }, "/"]] },
