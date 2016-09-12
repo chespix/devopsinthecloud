@@ -24,10 +24,8 @@ Feature: Scripted provisioning of target environment
 
     Scenario: Httpd conf should have passenger variables
         When I scrape "/etc/httpd/conf/httpd.conf"
-        Then "PassengerRoot /usr/local/share/ruby/gems/2.0/gems/passenger-5.0.7" should be present
+        Then "PassengerRoot /usr/local/share/ruby/gems/2.2/gems/passenger-5.0.7" should be present
 
     Scenario: Httpd conf should have a virtual host added
         When I scrape "/etc/httpd/conf/httpd.conf"
         Then "NameVirtualHost \*:80" should be present
-
-
