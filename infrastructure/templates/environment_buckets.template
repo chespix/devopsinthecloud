@@ -82,7 +82,7 @@
       "Value" : {"Ref" : "PublicBucket"}
     },
     "SecretsBucketName" : {
-      "Value" : {"Ref" : "PublicBucket"}
+      "Value" : {"Ref" : "PrivateBucket"}
     }
   }
 }
