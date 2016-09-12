@@ -195,7 +195,7 @@
 		  "echo \"Defaults:ec2-user !requiretty\" >> /etc/sudoers\n",
 
 		  "# Install passenger module for apache2\n",
-		  "/usr/local/bin/passenger-install-apache2-module -a\n",
+		  "/usr/local/bin/passenger-install-apache2-module -a | tee /var/log/passenger-install.log\n",
 
 		  "/opt/aws/bin/cfn-signal", " -e 0", " '", { "Ref" : "WaitHandle" }, "'","\n",
 
