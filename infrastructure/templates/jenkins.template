@@ -174,9 +174,10 @@
         				"libxml2-devel"			: [],
         				"libxslt-devel"			: [],
         				"libyaml-devel"			: [],
-                "rubygem20-io-console"  : [],
-                "ruby20-devel"          : [],
-                "rubygems20-devel"      : [],
+                "rubygem22-io-console"  : [],
+                "ruby22-devel"          : [],
+                "rubygems22-devel"      : [],
+                "postgresql-devel"      : [],
                 "mysql-devel"           : []
               }
             },
@@ -327,16 +328,15 @@
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
+      "# Install special repo package\n"
+      "yum install -y nodejs npm --enablerepo=epel\n"
+
 		  "# Copy Github credentials to root ssh directory\n",
 		  "cp /usr/share/tomcat6/.ssh/* /root/.ssh/\n",
 
 		  "# Update Jenkins with versioned configuration\n",
 		  "rm -rf /usr/share/tomcat6/.jenkins\n",
 		  "git clone git@github.com:chespix/", { "Ref" : "Project" }, "jenkins.git /usr/share/tomcat6/.jenkins\n",
-
-		  "# Installing Ruby 1.9.3 from RPM\n",
-		  "wget https://s3.amazonaws.com/stelligentlabs/resources/rpm/ruby-1.9.3p0-2.amzn1.x86_64.rpm\n",
-		  "rpm -Uvh ruby-1.9.3p0-2.amzn1.x86_64.rpm\n",
 
 		  "# Install Jenkins Plugins\n",
 		  "wget -P /usr/share/tomcat6/.jenkins/plugins/ http://updates.jenkins-ci.org/download/plugins/git/1.1.16/git.hpi\n",

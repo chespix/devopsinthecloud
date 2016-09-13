@@ -86,6 +86,7 @@
                 "puppet3"   : [],
                 "ruby22"   : [],
                 "ruby22-devel"   : [],
+                "postgresql-devel"      : [],
                 "mysql-devel"   : []
               }
             },
@@ -177,8 +178,12 @@
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
-          "/usr/sbin/update-alternatives --set ruby /usr/bin/ruby2.2\n",
-          "/usr/sbin/update-alternatives --set gem /usr/bin/gem2.2\n",
+      "# Update alternatives to ruby2.2\n"
+      "/usr/sbin/update-alternatives --set ruby /usr/bin/ruby2.2\n",
+      "/usr/sbin/update-alternatives --set gem /usr/bin/gem2.2\n",
+
+      "# Install special repo package\n"
+      "yum install -y nodejs npm --enablerepo=epel\n"
 
 		  "# Build environment using Puppet\n",
           "puppet apply --modulepath=/home/ec2-user/modules /home/ec2-user/nodes.pp\n",
