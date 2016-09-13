@@ -327,7 +327,7 @@
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " |tee /var/log/cfn-init.log\n",
 
-      "# Update alternatives to ruby2.2\n"
+      "# Update alternatives to ruby2.2\n",
       "/usr/sbin/update-alternatives --set ruby /usr/bin/ruby2.2\n",
       "/usr/sbin/update-alternatives --set gem /usr/bin/gem2.2\n",
 
