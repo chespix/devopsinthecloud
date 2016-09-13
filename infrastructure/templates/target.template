@@ -326,8 +326,8 @@
       "Value" : { "Ref" : "AWS::StackName" }
     },
 	"Domain" : {
-      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ] }, "/"]] },
-      "Description" : "URL for newly created Sample App"
+      "Value" : { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ]},
+      "Description" : "Domain for newly created Sample App"
     }
   }
 }
