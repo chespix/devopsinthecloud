@@ -86,7 +86,6 @@
                 "puppet3"   : [],
                 "ruby22"   : [],
                 "ruby22-devel"   : [],
-                "postgresql-devel"      : [],
                 "mysql-devel"   : []
               }
             },
@@ -183,7 +182,7 @@
       "/usr/sbin/update-alternatives --set gem /usr/bin/gem2.2\n",
 
       "# Install special repo package\n",
-      "yum install -y nodejs npm --enablerepo=epel\n",
+      "yum install -y postgresql-devel nodejs npm --enablerepo=epel\n",
 
 		  "# Build environment using Puppet\n",
           "puppet apply --modulepath=/home/ec2-user/modules /home/ec2-user/nodes.pp\n",

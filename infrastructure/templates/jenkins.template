@@ -177,7 +177,6 @@
                 "rubygem22-io-console"  : [],
                 "ruby22-devel"          : [],
                 "rubygems22-devel"      : [],
-                "postgresql-devel"      : [],
                 "mysql-devel"           : []
               }
             },
@@ -329,7 +328,7 @@
           "    --region ", { "Ref" : "AWS::Region" }, " |tee /var/log/cfn-init.log\n",
 
       "# Install special repo package\n",
-      "yum install -y nodejs npm --enablerepo=epel\n",
+      "yum install -y postgresql-devel nodejs npm --enablerepo=epel\n",
 
 		  "# Copy Github credentials to root ssh directory\n",
 		  "cp /usr/share/tomcat6/.ssh/* /root/.ssh/\n",
