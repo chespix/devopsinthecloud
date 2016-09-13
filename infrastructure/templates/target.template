@@ -120,7 +120,7 @@
 
 			  "/etc/httpd/conf/virtualhosts" : {
 	            "content" : { "Fn::Join" : ["", [
-	              "<VirtualHost ", { "Ref" : "IPAddress" }, ":80>\n",
+	              "<VirtualHost *:80>\n",
 				  "RailsEnv ", {"Ref" : "EnvironmentType"}, "\n",
 				  "DocumentRoot /var/www/rails/public\n",
 				  "<Directory /var/www/rails/public>\n",

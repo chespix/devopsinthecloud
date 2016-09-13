@@ -31,7 +31,8 @@ set :deploy_via, :remote_cache
 after "deploy:setup", "deploy:deploy"
 after "deploy:deploy", "deploy:bundle_install"
 after "deploy:bundle_install", "deploy:db_migrate"
-after "deploy:db_migrate", "deploy:restart"
+after "deploy:db_migrate", "deploy:bundle_test"
+after "deploy:bundle_test", "deploy:restart"
 
 namespace :deploy do
   task :setup do
@@ -39,22 +40,26 @@ namespace :deploy do
     run "sudo mkdir #{deploy_to}"
     run "sudo chown -R #{user}:#{user} #{deploy_to}"
   end
-  
+
   task :deploy do
     run "cd #{deploy_to} && sudo wget #{artifact_url}"
     run "cd #{deploy_to} && sudo tar -zxf #{artifact}"
     run "cd #{deploy_to} && sudo rm #{artifact}"
     run "sudo chown -R #{user}:#{user} #{deploy_to}"
   end
-  
+
   task :bundle_install do
-    run "cd #{deploy_to} && bundle install"
+    run "cd #{deploy_to} && bundle install --without production"
   end
-  
+
   task :db_migrate do
     run "cd #{deploy_to} && bundle exec rake db:migrate"
   end
-  
+
+  task :bundle_test do
+    run "cd #{deploy_to} && bundle exec rake test"
+  end
+
   task :start, :roles => :app do
     run "sudo service httpd start"
   end
