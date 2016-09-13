@@ -328,8 +328,8 @@
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
 
-      "# Install special repo package\n"
-      "yum install -y nodejs npm --enablerepo=epel\n"
+      "# Install special repo package\n",
+      "yum install -y nodejs npm --enablerepo=epel\n",
 
 		  "# Copy Github credentials to root ssh directory\n",
 		  "cp /usr/share/tomcat6/.ssh/* /root/.ssh/\n",
