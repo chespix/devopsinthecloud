@@ -326,7 +326,7 @@
           "/opt/aws/bin/cfn-init -s ", { "Ref" : "AWS::StackName" }, " -r JenkinsServer ",
           "    --access-key ",  { "Ref" : "HostKeys" },
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
-          "    --region ", { "Ref" : "AWS::Region" }, " || error_exit 'Failed to run cfn-init'\n",
+          "    --region ", { "Ref" : "AWS::Region" }, " |tee /var/log/cfn-init.log\n",
 
       "# Install special repo package\n",
       "yum install -y nodejs npm --enablerepo=epel\n",
