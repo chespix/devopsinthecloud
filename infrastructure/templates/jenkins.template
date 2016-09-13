@@ -327,6 +327,10 @@
           "    --secret-key ", {"Fn::GetAtt": ["HostKeys", "SecretAccessKey"]},
           "    --region ", { "Ref" : "AWS::Region" }, " |tee /var/log/cfn-init.log\n",
 
+      "# Update alternatives to ruby2.2\n"
+      "/usr/sbin/update-alternatives --set ruby /usr/bin/ruby2.2\n",
+      "/usr/sbin/update-alternatives --set gem /usr/bin/gem2.2\n",
+
       "# Install special repo package\n",
       "yum install -y postgresql-devel nodejs npm --enablerepo=epel\n",
 
@@ -379,7 +383,7 @@
 
 		  "# Setup deployment directory\n",
 		  "mkdir /var/www/rails\n",
-		  "sudo chown -R ec2-user:ec2-user /var/www/rails\n",
+		  "chown -R ec2-user:ec2-user /var/www/rails\n",
 
 		  "# Tomcat Setup\n",
 		  "chown -R tomcat:tomcat /usr/share/tomcat6/\n",
