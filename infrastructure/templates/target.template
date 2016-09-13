@@ -316,13 +316,16 @@
   },
 
   "Outputs" : {
+    "ArtifactBucket" : {
+      "Value" : { "Fn::Join" : ["", [{ "Ref" : "Environment" }, "-", { "Ref" : "Project" } , "-artifacts"]]}
+    },
     "InstanceIPAddress" : {
       "Value" : { "Ref" : "IPAddress" }
     },
 	"StackName" : {
       "Value" : { "Ref" : "AWS::StackName" }
     },
-	"SampleApp" : {
+	"Domain" : {
       "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServer", "PublicDnsName" ] }, "/"]] },
       "Description" : "URL for newly created Sample App"
     }
