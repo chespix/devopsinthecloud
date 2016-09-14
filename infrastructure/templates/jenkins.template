@@ -17,6 +17,18 @@
         "ConstraintDescription" : "Valid project name"
   	},
 
+    "Organization" : {
+  	  "Description" : "Organization Name",
+        "Type" : "String",
+        "ConstraintDescription" : "valid github organization or user"
+  	},
+
+    "Domain" : {
+  	  "Description" : "Domain Name",
+        "Type" : "String",
+        "ConstraintDescription" : "Valid Domain for the jenkis. ie: example.com"
+  	},
+
     "VPCCIDR" : {
   	  "Description" : "CIDR Range in format x.x.x.x/x",
         "Type" : "String",
@@ -42,7 +54,7 @@
     "InstanceType" : {
       "Description" : "Jenkins EC2 instance type",
       "Type" : "String",
-      "Default" : "m3.xlarge",
+      "Default" : "t2.micro",
       "ConstraintDescription" : "Must be a valid EC2 instance type."
     }
   },
@@ -165,6 +177,7 @@
           "config" : {
             "packages" : {
               "yum" : {
+                "unzip"      : [],
                 "java-1.6.0-openjdk"    : [],
                 "tomcat6"   			: [],
         				"git"					: [],
@@ -191,7 +204,9 @@
 		      },
 
 		      "/usr/share/tomcat6/scripts/aws/sqs_receive_message.rb" : {
-			  	"source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+			  	"source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/",
+            { "Ref" : "Organization" },
+            "/",
             { "Ref" : "Project" },
             "/",
             { "Ref" : "Environment" },
@@ -203,7 +218,9 @@
 
 			  "/usr/share/tomcat6/scripts/aws/sqs_send_message.rb" : {
 				"source" : { "Fn::Join" : ["",
-          ["https://raw.githubusercontent.com/chespix/",
+          ["https://raw.githubusercontent.com/",
+           { "Ref" : "Organization" },
+           "/",
            { "Ref" : "Project" },
            "/",
            { "Ref" : "Environment" },
@@ -214,7 +231,9 @@
 		      },
 
 			  "/usr/share/tomcat6/scripts/aws/terminate.rb" : {
-		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/",
+           { "Ref" : "Organization" },
+           "/",
            { "Ref" : "Project" },
            "/",
            { "Ref" : "Environment" },
@@ -225,7 +244,9 @@
 		      },
 
 		  	  "/usr/share/tomcat6/scripts/aws/create_config_domain.rb" : {
-		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/",
+           { "Ref" : "Organization" },
+           "/",
            { "Ref" : "Project" },
            "/",
            { "Ref" : "Environment" },
@@ -236,7 +257,9 @@
 		      },
 
 			  "/usr/share/tomcat6/scripts/aws/showback_domain.rb" : {
-		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+		        "source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/",
+           { "Ref" : "Organization" },
+           "/",
            { "Ref" : "Project" },
            "/",
            { "Ref" : "Environment" },
@@ -263,7 +286,9 @@
 	          },
 
 			  "/etc/cron.hourly/jenkins_versioning.sh" : {
-				"source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/chespix/",
+				"source" : { "Fn::Join" : ["", ["https://raw.githubusercontent.com/",
+           { "Ref" : "Organization" },
+           "/",
            { "Ref" : "Project" },
            "/",
            { "Ref" : "Environment" },
@@ -306,16 +331,16 @@
                                     "DeviceIndex" : "0"
                                 } ],
         "KeyName"        : { "Ref" : "KeyName" },
-		"Tags"           : [ {
-         "Key" : "Environment",
-         "Value" : { "Ref" : "Environment" }
-      }, {
-         "Key" : "Project",
-         "Value" : { "Ref" : "Project" }
-      }, {
-         "Key" : "Name",
-        "Value" : "Jenkins"
-      } ],
+    		"Tags"           : [ {
+             "Key" : "Environment",
+             "Value" : { "Ref" : "Environment" }
+          }, {
+             "Key" : "Project",
+             "Value" : { "Ref" : "Project" }
+          }, {
+             "Key" : "Name",
+            "Value" : "Jenkins"
+          } ],
         "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [
           "#!/bin/bash -v\n",
 		  "date > /home/ec2-user/starttime\n",
@@ -339,7 +364,7 @@
 
 		  "# Update Jenkins with versioned configuration\n",
 		  "rm -rf /usr/share/tomcat6/.jenkins\n",
-		  "git clone git@github.com:chespix/", { "Ref" : "Project" }, "jenkins.git /usr/share/tomcat6/.jenkins\n",
+		  "git clone git@github.com:",{ "Ref" : "Organization" },"/", { "Ref" : "Project" }, "jenkins.git /usr/share/tomcat6/.jenkins\n",
 
 		  "# Install Jenkins Plugins\n",
 		  "wget -P /usr/share/tomcat6/.jenkins/plugins/ http://updates.jenkins-ci.org/download/plugins/git/1.1.16/git.hpi\n",
@@ -378,8 +403,10 @@
 		  "echo \"AWS_CLOUDFORMATION_HOME=/opt/aws/apitools/cfn/\" >> /etc/sysconfig/tomcat6\n",
 
 		  "# Add CloudFormation CLI tools\n",
-		  "wget -P /opt/aws/apitools/ https://s3.amazonaws.com/stelligentlabs/resources/aws_cli/CloudFormation-CLI.tar.gz\n",
-		  "tar -C /opt/aws/apitools/ -xf /opt/aws/apitools/CloudFormation-CLI.tar.gz\n",
+		  "wget -P /opt/aws/apitools/ https://s3.amazonaws.com/cloudformation-cli/AWSCloudFormation-cli.zip\n",
+
+		  "unzip /opt/aws/apitools/AWSCloudFormation-cli.zip -d /opt/aws/apitools/\n",
+      "mv /opt/aws/apitools/AWSCloudFormation-* /opt/aws/apitools/cfn\n",
 
 		  "# Setup deployment directory\n",
 		  "mkdir /var/www/rails\n",
@@ -399,13 +426,15 @@
     "JenkinsFQDN" : {
       "Type" : "AWS::Route53::RecordSet",
       "Properties" : {
-        "HostedZoneName" : "chespi.org.",
+        "HostedZoneName" : { "Fn::Join" : ["", { "Ref" : "Domain" },"."]},
         "Comment" : "DNS name for my instance.",
         "Name" : { "Fn::Join" : ["",
            [ { "Ref" : "Environment" } ,
            "-",
            { "Ref" : "Project" } ,
-           "-jenkins.chespi.org." ]]},
+           "-jenkins.",
+           { "Ref" : "Domain" },
+           "." ]]},
         "Type" : "A",
         "TTL" : "900",
         "ResourceRecords" : [ { "Ref" : "IPAddress" } ]

@@ -14,11 +14,21 @@ set :artifact_bucket do
   item.attributes['artifact_bucket'].values[0].to_s
 end
 
+set :project do
+  item = sdb.domains["test"].items["parameters"]
+  item.attributes["project"].values[0].to_s
+end
+
+set :environment do
+  item = sdb.domains["test"].items["parameters"]
+  item.attributes["environment"].values[0].to_s
+end
+
 set :user,             "ec2-user"
 set :application,      "rails"
 set :use_sudo,         false
 set :deploy_to,        "/var/www/#{application}"
-set :artifact,         "devopsinthecloud.tar.gz"
+set :artifact,         "#{project}.tar.gz"
 set :artifact_url,     "https://s3.amazonaws.com/#{artifact_bucket}/#{artifact}"
 set :ssh_options,      {:forward_agent => true}
 
