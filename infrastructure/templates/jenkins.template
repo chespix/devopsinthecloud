@@ -426,7 +426,7 @@
     "JenkinsFQDN" : {
       "Type" : "AWS::Route53::RecordSet",
       "Properties" : {
-        "HostedZoneName" : { "Fn::Join" : ["", { "Ref" : "Domain" },"."]},
+        "HostedZoneName" : { "Fn::Join" : ["", [{ "Ref" : "Domain" },"."]]},
         "Comment" : "DNS name for my instance.",
         "Name" : { "Fn::Join" : ["",
            [ { "Ref" : "Environment" } ,
